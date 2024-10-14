@@ -48,21 +48,44 @@ export async function POST(req, { params }) {
 // Xử lý GET request - Lấy thông tin yêu cầu nhận lớp
 export async function GET(req, { params }) {
   const { requestId } = params;
+  const page = parseInt(req.nextUrl.searchParams.get('page') || '1');
+  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '10');
 
-  // Lấy thông tin yêu cầu nhận lớp
+  // Tính toán vị trí bắt đầu (offset) dựa trên trang hiện tại và số lượng bản ghi trên mỗi trang
+  const offset = (page - 1) * limit;
+
+  // Lấy tổng số bản ghi để tính tổng số trang
+  const { count, error: countError } = await supabaseApi
+    .from('yeu_cau_nhan_lop')
+    .select('*', { count: 'exact', head: true })
+    .eq('id_lop', requestId);
+
+  if (countError) {
+    return NextResponse.json({ error: countError.message }, { status: 500 });
+  }
+
+  const totalPages = Math.ceil(count / limit);
+
+  // Lấy thông tin yêu cầu nhận lớp với phân trang
   const { data, error } = await supabaseApi
     .from('yeu_cau_nhan_lop')
     .select('id, id_lop, username, total_price, description, plan, created_at')
     .eq('id_lop', requestId)
-    // xắp xếp theo thời gian tạo yêu cầu
-    .order('created_at', { ascending: false });
+    // Sắp xếp theo thời gian tạo yêu cầu
+    .order('created_at', { ascending: false })
+    // Áp dụng phân trang
+    .range(offset, offset + limit - 1);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Trả về thông tin yêu cầu nhận lớp
-  return NextResponse.json(data);
+  // Trả về thông tin yêu cầu nhận lớp cùng với dữ liệu phân trang
+  return NextResponse.json({
+    data,
+    currentPage: page,
+    totalPages: totalPages,
+  });
 }
 
 // Xử lý DELETE request - Hủy yêu cầu nhận lớp
