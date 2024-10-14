@@ -33,6 +33,10 @@ export function generateUsername(fullName) {
   // Lấy họ (từ đầu tiên) và tên (từ cuối cùng)
   let lastName = nameParts[0];
   let firstName = nameParts[nameParts.length - 1];
+
+  if (nameParts.length === 1){
+    firstName = "";
+  }
   
   // Tạo username từ họ và tên, loại bỏ dấu
   let username = (lastName + firstName)
