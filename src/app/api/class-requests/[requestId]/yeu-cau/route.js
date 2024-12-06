@@ -80,6 +80,20 @@ export async function GET(req, { params }) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // get list of users
+  for (let i = 0; i < data.length; i++) {
+    const { data: user, error: userError } = await supabaseApi
+      .from('user')
+      .select('username, full_name, avatar, is_active, address, phone, email, role')
+      .eq('username', data[i].username);
+
+    if (userError) {
+      return NextResponse.json({ error: userError.message }, { status: 500 });
+    }
+
+    data[i].author = user[0];
+  }
+
   // Trả về thông tin yêu cầu nhận lớp cùng với dữ liệu phân trang
   return NextResponse.json({
     data,
