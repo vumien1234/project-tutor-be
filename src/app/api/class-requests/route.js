@@ -8,6 +8,10 @@ export async function GET(request) {
   const limit = parseInt(request.nextUrl.searchParams.get('limit') || '100');
   const username = request.nextUrl.searchParams.get('username') || '';
   const status = request.nextUrl.searchParams.get('status') || '';
+  const due = request.nextUrl.searchParams.get('due') || '';
+
+  // Lấy ngày hiện tại ở định dạng yyyy-mm-dd
+  const currentDate = new Date().toISOString().split('T')[0]; // Chỉ lấy phần ngày (yyyy-mm-dd)
 
   // Tính offset cho phân trang
   const offset = (page - 1) * limit;
@@ -21,6 +25,9 @@ export async function GET(request) {
   if (status) {
     countQuery = countQuery.eq('status', status);
   }
+  if (due) {
+    countQuery = countQuery.gte('due_date', currentDate); // Lọc theo due_date nếu có
+  }
 
   const { count, error: countError } = await countQuery;
 
@@ -31,13 +38,21 @@ export async function GET(request) {
   const totalPages = Math.ceil(count / limit);
 
   // Xây dựng truy vấn lấy dữ liệu
-  let dataQuery = supabaseApi.from('yeu_cau_mo_lop').select('*').range(offset, offset + limit - 1);
+  let dataQuery = supabaseApi.from('yeu_cau_mo_lop').select('id,username,subject,address,total_price,time,due_date,status,gender,level').range(offset, offset + limit - 1);
 
   if (username) {
     dataQuery = dataQuery.eq('username', username);
   }
   if (status) {
     dataQuery = dataQuery.eq('status', status);
+  }
+  if (due) {
+    dataQuery = dataQuery.gte('due_date', currentDate); // Lọc theo due_date nếu có
+  }
+
+  // Sắp xếp theo thời gian nếu có due
+  if (due) {
+    dataQuery = dataQuery.order('time', { ascending: true }); // Sắp xếp theo thời gian tăng dần
   }
 
   const { data, error } = await dataQuery;
@@ -59,11 +74,11 @@ export async function GET(request) {
 
 // Xử lý POST request - Tạo yêu cầu thuê lớp học
 export async function POST(req) {
-  const { username, subject, address, total_price, time, note, due_date } = await req.json();
+  const { username, subject, address, total_price, time, note, due_date, gender, level, calendar } = await req.json();
 
   const { data, error } = await supabaseApi
     .from('yeu_cau_mo_lop')
-    .insert([{ username, subject, address, total_price, time, note, due_date, status: 'pending' }]);
+    .insert([{ username, subject, address, total_price, time, note, due_date, gender, level, calendar, status: 'pending' }]);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

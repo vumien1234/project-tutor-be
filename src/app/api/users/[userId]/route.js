@@ -37,6 +37,7 @@ export async function PUT(req, { params }) {
       full_name,
       phone,
       password,
+      subjects
     } = await req.json();
 
     // Cập nhật thông tin người dùng trong database user. cái nào rỗng thì không cập nhật
@@ -54,6 +55,7 @@ export async function PUT(req, { params }) {
         job,
         full_name,
         phone,
+        subjects
       })
       .eq('username', userId);
 

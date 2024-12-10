@@ -39,15 +39,25 @@ export async function POST(req) {
 // Xử lý GET request - get all user
 export async function GET(req) {
   const page = parseInt(req.nextUrl.searchParams.get('page') || '1');
-  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '10');
+  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '1000');
+  const role = req.nextUrl.searchParams.get('role') || '';
 
   // Tính offset cho phân trang
   const offset = (page - 1) * limit;
 
-  // Lấy tổng số bản ghi để tính toán tổng số trang
-  const { count, error: countError } = await supabaseApi
+  // Bắt đầu truy vấn với Supabase
+  let query = supabaseApi
     .from('user')
-    .select('*', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true })
+    .range(offset, offset + limit - 1);
+
+  // Nếu role có giá trị, thêm điều kiện lọc theo role
+  if (role) {
+    query = query.eq('role', role);
+  }
+
+  // Lấy tổng số bản ghi để tính toán tổng số trang
+  const { count, error: countError } = await query;
 
   if (countError) {
     return NextResponse.json({ error: countError.message }, { status: 500 });
@@ -55,11 +65,19 @@ export async function GET(req) {
 
   const totalPages = Math.ceil(count / limit);
 
-  // Lấy dữ liệu với phân trang
-  const { data, error } = await supabaseApi
+  // Truy vấn lấy dữ liệu với phân trang và điều kiện search role (nếu có)
+  let dataQuery = supabaseApi
     .from('user')
-    .select('id, username, full_name, email, role, is_active, address, gender, cccd, introduction, job, full_name, phone')
+    .select('id, username, full_name, email, subjects, role, is_active, avatar, address, gender, cccd, introduction, job, full_name, phone')
     .range(offset, offset + limit - 1);
+
+  // Nếu role có giá trị, thêm điều kiện lọc theo role
+  if (role) {
+    dataQuery = dataQuery.eq('role', role);
+  }
+
+  // Lấy dữ liệu
+  const { data, error } = await dataQuery;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

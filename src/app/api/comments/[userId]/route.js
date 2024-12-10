@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(req, { params }) {
   const { userId } = params; // Lấy userId từ URL
   const page = parseInt(req.nextUrl.searchParams.get('page') || '1');
-  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '10');
+  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '1000');
 
   // Tính toán vị trí bắt đầu (offset) cho phân trang
   const offset = (page - 1) * limit;
@@ -33,9 +33,9 @@ export async function GET(req, { params }) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (!data.length) {
-    return NextResponse.json({ message: 'Không có nhận xét.' }, { status: 404 });
-  }
+  // if (!data.length) {
+  //   return NextResponse.json({ message: 'Không có nhận xét.' }, { status: 200 });
+  // }
 
   // Trả về dữ liệu với thông tin phân trang
   return NextResponse.json({

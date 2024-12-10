@@ -34,6 +34,7 @@ export async function POST(req, { params }) {
       username,
       total_price,
       description,
+      status: 'pending',
       plan,
     });
 
@@ -49,7 +50,7 @@ export async function POST(req, { params }) {
 export async function GET(req, { params }) {
   const { requestId } = params;
   const page = parseInt(req.nextUrl.searchParams.get('page') || '1');
-  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '10');
+  const limit = parseInt(req.nextUrl.searchParams.get('limit') || '1000');
 
   // Tính toán vị trí bắt đầu (offset) dựa trên trang hiện tại và số lượng bản ghi trên mỗi trang
   const offset = (page - 1) * limit;
@@ -97,6 +98,7 @@ export async function GET(req, { params }) {
   // Trả về thông tin yêu cầu nhận lớp cùng với dữ liệu phân trang
   return NextResponse.json({
     data,
+    id_lop: requestId,
     currentPage: page,
     totalPages: totalPages,
   });
