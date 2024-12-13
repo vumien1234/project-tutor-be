@@ -70,7 +70,7 @@ export async function GET(req, { params }) {
   // Lấy thông tin yêu cầu nhận lớp với phân trang
   const { data, error } = await supabaseApi
     .from('yeu_cau_nhan_lop')
-    .select('id, id_lop, username, total_price, description, plan, created_at')
+    .select('id, id_lop, username, total_price, description, plan, created_at, status')
     .eq('id_lop', requestId)
     // Sắp xếp theo thời gian tạo yêu cầu
     .order('created_at', { ascending: false })
@@ -102,6 +102,89 @@ export async function GET(req, { params }) {
     currentPage: page,
     totalPages: totalPages,
   });
+}
+
+
+export async function PUT(req, { params }) {
+  const { requestId } = params;
+  const { status, username, id } = await req.json();
+
+  // find id yeu_cau_nhan_lop
+  const { data: data2, error: error2 } = await supabaseApi
+    .from('yeu_cau_nhan_lop')
+    .select('*')
+    .eq('id', id);
+
+  if (error2) {
+    return NextResponse.json({ error: error2.message }, { status: 500 });
+  }
+
+  if (!data2.length) {
+    return NextResponse.json({ error: 'Yêu cầu không tồn tại 1' }, { status: 404 });
+  }
+
+  let dataYeuCau = data2[0];
+
+  // update status
+  if (dataYeuCau.id_lop != requestId) {
+    return NextResponse.json({ error: 'Yêu cầu không tồn tại 2' }, { status: 404 });
+  }
+
+  if (dataYeuCau.username !== username) {
+    return NextResponse.json({ error: 'Yêu cầu không tồn tại 3' }, { status: 404 });
+  }
+
+  const { data: data3, error: error3 } = await supabaseApi
+  .from('yeu_cau_mo_lop')
+  .select('*')
+  .eq('id', requestId);
+
+  if (error3) {
+    return NextResponse.json({ error: error3.message }, { status: 500 });
+  }
+
+  if (!data3.length) {
+    return NextResponse.json({ error: 'Yêu cầu không tồn tại 4' }, { status: 404 });
+  }
+
+  let dataLop = data3[0];
+
+  if (dataLop.status === "done"){
+    return NextResponse.json({ error: 'Lớp đã được nhận' }, { status: 400 });
+  }
+
+  // update status yeu_cau_nhan_lop
+  const { data: data4, error: error4 } = await supabaseApi
+    .from('yeu_cau_nhan_lop')
+    .update({ status })
+    .eq('id', id);
+
+  if (error4) {
+    return NextResponse.json({ error: error4.message }, { status: 500 });
+  }
+
+  // update status yeu_cau_mo_lop
+  let statusLop = dataLop.status;
+  if (status === "waiting_payment") {
+    statusLop = " ";
+  }
+  if (status === "done") {
+    statusLop = "done";
+  }
+  if (status !== "rejected") {
+    const { data: data5, error: error5 } = await supabaseApi
+      .from('yeu_cau_mo_lop')
+      .update({ status: statusLop })
+      .eq('id', requestId);
+    
+      if (error5) {
+      return NextResponse.json({ error: error5.message }, { status: 500 });
+    }
+  }
+
+
+  // Trả về phản hồi khi yêu cầu được cập nhật thành công
+  return NextResponse.json({ message: 'Yêu cầu nhận lớp đã được cập nhật' });
 }
 
 // Xử lý DELETE request - Hủy yêu cầu nhận lớp

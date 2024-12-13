@@ -1,4 +1,5 @@
 import { generateUsername } from "@tutor/app/utils/auth";
+import sendEmail from "@tutor/app/utils/sendEmail";
 import { supabaseApi } from "@tutor/supabase/apiRouteClient";
 import { NextResponse } from "next/server";
 
@@ -30,6 +31,26 @@ export async function POST(req) {
   if (insertError) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
+
+  await sendEmail({
+    email: email,
+    subject: "Chúc mừng! Đăng ký tài khoản thành công",
+    html: `
+      <p>Xin chào ${full_name},</p>
+      <p>Cảm ơn bạn đã đăng ký tài khoản trên hệ thống gia sư trực tuyến của chúng tôi. Chúng tôi rất vui mừng được chào đón bạn gia nhập cộng đồng học tập của chúng tôi.</p>
+      <p>Dưới đây là thông tin tài khoản của bạn:</p>
+      <ul>
+        <li><strong>Email:</strong> ${email}</li>
+        <li><strong>Tên đăng nhập:</strong> ${username}</li>
+      </ul>
+      <p>Chúng tôi hy vọng bạn sẽ có những trải nghiệm học tập tuyệt vời cùng chúng tôi. Nếu có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.</p>
+      
+      <p>Chúc bạn một ngày làm việc hiệu quả và nhiều niềm vui!</p>
+      
+      <p>Trân trọng,</p>
+      <p><strong>Đội ngũ hỗ trợ của hệ thống gia sư trực tuyến</strong></p>
+    `
+  });  
 
   return NextResponse.json({
     message: "Đăng ký tài khoản thành công",
