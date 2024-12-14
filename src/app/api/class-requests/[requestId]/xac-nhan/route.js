@@ -1,3 +1,4 @@
+import sendEmail from "@tutor/app/utils/sendEmail";
 import { supabaseApi } from "@tutor/supabase/apiRouteClient";
 import { NextResponse } from "next/server";
 
@@ -72,7 +73,7 @@ export async function POST(req, { params }) {
       username_user: data[0].username,
       username_tutor: yeuCauNhanLop[0].username,
       status: 'active',
-    }
+    };
 
     // insert danh_sach_lop
     const { error: insertDanhSachLopError } = await supabaseApi
@@ -82,6 +83,174 @@ export async function POST(req, { params }) {
     if (insertDanhSachLopError) {
       return NextResponse.json({ error: insertDanhSachLopError }, { status: 500 });
     }
+
+
+    // get email of tutor and user
+    const { data: tutorData, error: tutorError } = await supabaseApi
+      .from('user')
+      .select('email')
+      .eq('username', yeuCauNhanLop[0].username);
+
+    if (tutorError) {
+      return NextResponse.json({ error: tutorError.message }, { status: 500 });
+    }
+
+    const { data: userData, error: userError } = await supabaseApi
+      .from('user')
+      .select('email')
+      .eq('username', data[0].username);
+
+
+    if (userError) {
+      return NextResponse.json({ error: userError.message }, { status: 500 });
+    }
+
+    // send email to tutor
+    // send email to tutor
+await sendEmail({
+  email: tutorData[0].email,
+  subject: 'Lớp của bạn đã được nhận',
+  html: `
+    <html lang="vi">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Lớp của bạn đã được nhận</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+          background-color: #f9f9f9;
+        }
+        .email-container {
+          background-color: #fff;
+          padding: 20px;
+          margin: 0 auto;
+          width: 80%;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+          background-color: #4CAF50;
+          color: #fff;
+          padding: 10px;
+          text-align: center;
+          border-radius: 5px;
+        }
+        .email-body {
+          padding: 20px;
+          background-color: #f4f4f4;
+          margin-top: 20px;
+          border-radius: 5px;
+        }
+        .footer {
+          margin-top: 20px;
+          text-align: center;
+          font-size: 14px;
+          color: #777;
+        }
+        .link {
+          color: #4CAF50;
+          text-decoration: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="email-header">
+          <h2>Lớp của bạn đã được nhận</h2>
+        </div>
+        <div class="email-body">
+          <p>Chào bạn,</p>
+          <p>Lớp học của bạn đã được nhận và xác nhận.</p>
+          <p>Vui lòng truy cập <a href="https://onllearning.edu.vn/ho-so?tab=lich-hoc" class="link">đây</a> để xem thêm chi tiết và quản lý lớp học của bạn.</p>
+          <p>Cảm ơn bạn đã hợp tác!</p>
+        </div>
+        <div class="footer">
+          <p>Trân trọng,</p>
+          <p>Đội ngũ hỗ trợ lớp học</p>
+        </div>
+      </div>
+    </body>
+    </html>`
+});
+
+
+// send email to user
+await sendEmail({
+  email: userData[0].email,
+  subject: 'Lớp của bạn đã được mở',
+  html: `
+    <html lang="vi">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Lớp của bạn đã được mở</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          margin: 0;
+          padding: 0;
+          background-color: #f9f9f9;
+        }
+        .email-container {
+          background-color: #fff;
+          padding: 20px;
+          margin: 0 auto;
+          width: 80%;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+          background-color: #4CAF50;
+          color: #fff;
+          padding: 10px;
+          text-align: center;
+          border-radius: 5px;
+        }
+        .email-body {
+          padding: 20px;
+          background-color: #f4f4f4;
+          margin-top: 20px;
+          border-radius: 5px;
+        }
+        .footer {
+          margin-top: 20px;
+          text-align: center;
+          font-size: 14px;
+          color: #777;
+        }
+        .link {
+          color: #4CAF50;
+          text-decoration: none;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="email-header">
+          <h2>Lớp của bạn đã được mở</h2>
+        </div>
+        <div class="email-body">
+          <p>Chào bạn,</p>
+          <p>Lớp học của bạn đã được mở thành công.</p>
+          <p>Vui lòng truy cập <a href="https://onllearning.edu.vn/ho-so?tab=lich-hoc" class="link">đây</a> để xem thêm chi tiết và quản lý lớp học của bạn.</p>
+          <p>Cảm ơn bạn đã chọn tham gia!</p>
+        </div>
+        <div class="footer">
+          <p>Trân trọng,</p>
+          <p>Đội ngũ hỗ trợ lớp học</p>
+        </div>
+      </div>
+    </body>
+    </html>`
+});
+
 
     return NextResponse.json({ message: 'Xác nhận yêu cầu lớp học thành công' }, { status: 200 });
 }

@@ -166,7 +166,7 @@ export async function PUT(req, { params }) {
   // update status yeu_cau_mo_lop
   let statusLop = dataLop.status;
   if (status === "waiting_payment") {
-    statusLop = " ";
+    statusLop = "waiting_payment";
   }
   if (status === "done") {
     statusLop = "done";
