@@ -12,6 +12,10 @@ export async function POST(req) {
     ...data
   ]);
 
+  console.log(insertError);
+
+  console.log(data);
+
   return NextResponse.json({
     message: "Đăng ký tài khoản thành công",
   }, { status: 201 });
