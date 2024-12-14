@@ -24,3 +24,43 @@ export async function POST(req) {
     message: "ok",
   }, { status: 201 });
 }
+
+
+export async function GET(request) {
+  const content = request.nextUrl.searchParams.get('message') || '';
+  const totalPrice = request.nextUrl.searchParams.get('price') || 0;
+
+  if (content == '' || totalPrice == 0) {
+    return NextResponse.json({
+      message: "error",
+      error: "message or price is required"
+    }, { status: 400 });
+  }
+
+  // get 100 records from bank_history sorted by created_at
+  const { data: bankHistory, error } = await supabaseApi.from('bank_history').select('*').order('created_at', {ascending: false}).limit(100);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  
+  let transaction = null;
+  let hasValidTransaction = false;
+
+  for (let i = 0; i < bankHistory.length; i++) {
+    const item = bankHistory[i];
+
+    if (item.amount == totalPrice && item.description.includes(content)) {
+      hasValidTransaction = true;
+      transaction = item;
+      break;
+    }
+  }
+
+  return NextResponse.json({
+    message: "ok",
+    transaction: transaction,
+    hasValidTransaction: hasValidTransaction
+  }, { status: 200 });
+
+}
