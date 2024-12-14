@@ -7,16 +7,21 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
   const {data} = await req.json(); // Lấy dữ liệu từ request body
 
-  // save data to database
-  const { error: insertError } = await supabaseApi.from('bank_history').insert([
-    ...data
-  ]);
+  for (let i = 0; i < data.length; i++) {
+    const item = data[i];
 
-  console.log(insertError);
+    let { data: userCheck, error: errorCheck } = await supabaseApi.from('bank_history').select('id').eq('id', item.id);
 
-  console.log(data);
+    if (userCheck.length > 0) {
+      const { error: insertError } = await supabaseApi.from('bank_history').insert({item});
+      if (insertError) {
+        return NextResponse.json({ error: insertError.message }, { status: 500 });
+      }
+    }
+
+  }
 
   return NextResponse.json({
-    message: "Đăng ký tài khoản thành công",
+    message: "ok",
   }, { status: 201 });
 }
