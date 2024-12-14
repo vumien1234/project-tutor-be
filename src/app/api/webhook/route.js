@@ -13,13 +13,12 @@ export async function POST(req) {
     let { data: userCheck, error: errorCheck } = await supabaseApi.from('bank_history').select('id').eq('id', item.id);
 
     if (userCheck.length == 0) {
-      const { error: insertError } = await supabaseApi.from('bank_history').insert({...item});
-      if (insertError) {
-        return NextResponse.json({ error: insertError.message }, { status: 500 });
-      }
+      await supabaseApi.from('bank_history').insert({...item});
     }
 
   }
+
+  console.log(data);
 
   return NextResponse.json({
     message: "ok",
