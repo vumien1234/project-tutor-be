@@ -27,18 +27,20 @@ export async function POST(req) {
 
 
 export async function GET(request) {
+  const limit = request.nextUrl.searchParams.get('limit') || 100;
   const content = request.nextUrl.searchParams.get('message') || '';
   const totalPrice = request.nextUrl.searchParams.get('price') || 0;
+  const getData = request.nextUrl.searchParams.get('getData') || false;
 
-  if (content == '' || totalPrice == 0) {
-    return NextResponse.json({
-      message: "error",
-      error: "message or price is required"
-    }, { status: 400 });
-  }
+  // if (content == '' || totalPrice == 0) {
+  //   return NextResponse.json({
+  //     message: "error",
+  //     error: "message or price is required"
+  //   }, { status: 400 });
+  // }
 
   // get 100 records from bank_history sorted by created_at
-  const { data: bankHistory, error } = await supabaseApi.from('bank_history').select('*').order('created_at', {ascending: false}).limit(100);
+  const { data: bankHistory, error } = await supabaseApi.from('bank_history').select('*').order('created_at', {ascending: false}).limit(limit);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -60,6 +62,7 @@ export async function GET(request) {
   return NextResponse.json({
     message: "ok",
     transaction: transaction,
+    data: getData ? bankHistory : null,
     hasValidTransaction: hasValidTransaction
   }, { status: 200 });
 

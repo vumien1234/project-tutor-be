@@ -36,20 +36,85 @@ export async function POST(req) {
     email: email,
     subject: "Chúc mừng! Đăng ký tài khoản thành công",
     html: `
-      <p>Xin chào ${full_name},</p>
-      <p>Cảm ơn bạn đã đăng ký tài khoản trên hệ thống gia sư trực tuyến của chúng tôi. Chúng tôi rất vui mừng được chào đón bạn gia nhập cộng đồng học tập của chúng tôi.</p>
-      <p>Dưới đây là thông tin tài khoản của bạn:</p>
-      <ul>
-        <li><strong>Email:</strong> ${email}</li>
-        <li><strong>Tên đăng nhập:</strong> ${username}</li>
-      </ul>
-      <p>Chúng tôi hy vọng bạn sẽ có những trải nghiệm học tập tuyệt vời cùng chúng tôi. Nếu có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.</p>
-      
-      <p>Chúc bạn một ngày làm việc hiệu quả và nhiều niềm vui!</p>
-      
-      <p>Trân trọng,</p>
-      <p><strong>Đội ngũ hỗ trợ của hệ thống gia sư trực tuyến</strong></p>
-    `
+      <html lang="vi">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Đăng ký tài khoản thành công</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+          }
+          .email-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 0 auto;
+            width: 80%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+          .email-header {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+          }
+          .email-body {
+            padding: 20px;
+            background-color: #f4f4f4;
+            margin-top: 20px;
+            border-radius: 5px;
+          }
+          .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+          }
+          .list {
+            margin-left: 20px;
+          }
+          .list li {
+            margin-bottom: 8px;
+          }
+          .link {
+            color: #4CAF50;
+            text-decoration: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="email-container">
+          <div class="email-header">
+            <h2>Chúc mừng! Đăng ký tài khoản thành công</h2>
+          </div>
+          <div class="email-body">
+            <p>Xin chào <strong>${full_name}</strong>,</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản trên hệ thống gia sư trực tuyến của chúng tôi. Chúng tôi rất vui mừng được chào đón bạn gia nhập cộng đồng học tập của chúng tôi.</p>
+            
+            <p><strong>Dưới đây là thông tin tài khoản của bạn:</strong></p>
+            <ul class="list">
+              <li><strong>Email:</strong> ${email}</li>
+              <li><strong>Tên đăng nhập:</strong> ${username}</li>
+            </ul>
+  
+            <p>Chúng tôi hy vọng bạn sẽ có những trải nghiệm học tập tuyệt vời cùng chúng tôi. Nếu có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi qua email hoặc số điện thoại hỗ trợ.</p>
+            
+            <p>Chúc bạn một ngày làm việc hiệu quả và nhiều niềm vui!</p>
+          </div>
+          <div class="footer">
+            <p>Trân trọng,</p>
+            <p><strong>Đội ngũ hỗ trợ của hệ thống gia sư trực tuyến</strong></p>
+          </div>
+        </div>
+      </body>
+      </html>`
   });  
 
   return NextResponse.json({
