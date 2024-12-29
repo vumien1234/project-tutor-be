@@ -58,3 +58,17 @@ export async function POST(req) {
 
   return NextResponse.json(data, { status: 201 });
 }
+
+
+// Xử lý POST request - Tạo lớp học sau khi yêu cầu được xác nhận
+export async function PUT(req) {
+  const { id, status } = await req.json();
+
+  // Cập nhật thông tin yêu cầu lớp học trong database yeu_cau_mo_lop
+  const { error: updateError } = await supabaseApi
+    .from('lop_hoc')
+    .update({ status })
+    .eq('id', id);
+
+    return NextResponse.json({ message: 'cập nhập trạng thái thành công' }, { status: 200 });
+}
