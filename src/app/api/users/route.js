@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 // Xử lý POST request - Đăng ký người dùng
 export async function POST(req) {
-  const { full_name, email, password, role, phone = "", is_active = false } = await req.json(); // Lấy dữ liệu từ request body
+  const { full_name, email, password, role, phone = "" } = await req.json(); // Lấy dữ liệu từ request body
 
   // Kiểm tra dữ liệu đầu vào
   if (!full_name || !email || !password) {
@@ -21,6 +21,12 @@ export async function POST(req) {
 
   if (userCheck.length > 0) {
     username = username_add;
+  }
+
+  let is_active = true;
+
+  if (role === 'tutor') { 
+    is_active = false
   }
 
   // Tạo tài khoản người dùng
